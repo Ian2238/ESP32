@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#f6efe3">
 <title>接線實驗室</title>
+<meta name="description" content="接線實驗室：選 ESP32 開發板、加模組，自動分配腳位、拉線、出腳位表（builder-v1）">
 <link rel="stylesheet" href="css/app.css">
 </head>
 <body>
@@ -40,8 +41,9 @@
       </div>
     </div>
     <nav class="tabs">
-      <button data-t="steps" class="on">步驟</button><button data-t="table">接線表</button><button data-t="code">程式</button><button data-t="safety">注意</button><button data-t="pins">腳位圖</button>
+      <button data-t="build" style="display:none">組裝</button><button data-t="steps" class="on">步驟</button><button data-t="table">接線表</button><button data-t="code">程式</button><button data-t="safety">注意</button><button data-t="pins">腳位圖</button>
     </nav>
+    <div class="tab" id="tab-build"></div>
     <div class="tab on" id="tab-steps"><ol id="steplist"></ol></div>
     <div class="tab" id="tab-table"></div>
     <div class="tab" id="tab-code">
@@ -62,6 +64,8 @@
 <script src="js/boards.js"></script>
 <script src="assets/images.js"></script>
 <script src="js/app.js"></script>
+<!-- 首頁：自己組（空白麵包板＋零件庫＋自動配線） -->
+<script src="js/builder.js"></script>
 <!-- 專案設定：新增專案就在下面多加一行 -->
 <script src="projects/monalisa.js"></script>
 <script src="projects/cam-oled.js"></script>

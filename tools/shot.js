@@ -1,7 +1,17 @@
 // 用 headless Chrome 截圖檢查：node tools/shot.js
 const {chromium}=require('/workspace/pw/node_modules/playwright-core');
 const path=require('path'); const root=path.resolve(__dirname,'..');
+const BASIC=['s3_44',['dht11','oled_spi','soil_mh','led220']];
+const MANY=['s3_44',['tft24','oled_i2c13','dht11','ntc498','button','pullup10k','ds18b20','sonar','ws2812','sg90','relay','pot']];
+const CAM=['s3_cam',['oled_i2c13','dht11','soil_mh','led220']];
 const shots=[
+  ['desktop-build-empty',{width:1440,height:900},'#build'],
+  ['desktop-build-basic',{width:1440,height:900},'#build',BASIC],
+  ['desktop-build-basic-step',{width:1440,height:900},'#build',BASIC,9],
+  ['desktop-build-many',{width:1440,height:900},'#build',MANY],
+  ['desktop-build-cam',{width:1440,height:900},'#build',CAM],
+  ['phone-build-empty',{width:390,height:844,mobile:true},'#build'],
+  ['phone-build-basic',{width:390,height:844,mobile:true},'#build',BASIC],
   ['desktop-monalisa-all',{width:1440,height:900},'#monalisa'],
   ['desktop-monalisa-step5',{width:1440,height:900},'#monalisa/5'],
   ['desktop-monalisa-step12',{width:1440,height:900},'#monalisa/12'],
@@ -20,7 +30,7 @@ const shots=[
 const only=process.argv[2];
 (async()=>{
   const b=await chromium.launch({executablePath:'/usr/bin/google-chrome',args:['--use-gl=swiftshader','--enable-unsafe-swiftshader','--ignore-gpu-blocklist']});
-  for(const [name,vp,hash] of shots){
+  for(const [name,vp,hash,bld,stepN] of shots){
     if(only && !name.includes(only)) continue;
     const ctx=await b.newContext({viewport:{width:vp.width,height:vp.height},deviceScaleFactor:vp.mobile?2:1,isMobile:!!vp.mobile,hasTouch:!!vp.mobile,offline:true});
     const pg=await ctx.newPage(); const errs=[];
@@ -28,8 +38,14 @@ const only=process.argv[2];
     pg.on('requestfailed',r=>errs.push('FAIL '+r.url()));
     await pg.goto('file://'+root+'/index.html'+hash);
     await pg.waitForFunction('window.__ready===true',null,{timeout:30000});
+    if(bld){ await pg.evaluate(([b,t])=>WD.builder.apply(b,t),bld); await pg.waitForTimeout(500); }
+    if(stepN){ await pg.evaluate(n=>WD.go(n-1),stepN); }
     await pg.waitForTimeout(3500);
     await pg.screenshot({path:root+'/screenshots/'+name+'.png'});
+    if(name.startsWith('phone-build')) await pg.screenshot({path:root+'/screenshots/'+name+'-full.png',fullPage:true});
+    if(name==='desktop-build-basic'||name==='desktop-build-many'){ await pg.click('.tabs button[data-t=table]'); await pg.waitForTimeout(300); await pg.screenshot({path:root+'/screenshots/'+name+'-table.png'});
+      await pg.click('.tabs button[data-t=code]'); await pg.waitForTimeout(300); await pg.screenshot({path:root+'/screenshots/'+name+'-code.png'});
+      await pg.click('.tabs button[data-t=safety]'); await pg.waitForTimeout(300); await pg.screenshot({path:root+'/screenshots/'+name+'-safety.png'}); }
     if(name==='phone-monalisa-step5') await pg.screenshot({path:root+'/screenshots/phone-monalisa-step5-full.png',fullPage:true});
     if(name==='desktop-monalisa-all'){ await pg.click('.tabs button[data-t=table]'); await pg.waitForTimeout(300); await pg.screenshot({path:root+'/screenshots/desktop-monalisa-table.png'});
       await pg.click('.tabs button[data-t=code]'); await pg.click('#simbtn'); await pg.waitForTimeout(4200); await pg.screenshot({path:root+'/screenshots/desktop-monalisa-sim.png'});
