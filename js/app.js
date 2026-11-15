@@ -33,10 +33,12 @@ function parseHole(s) {           // 'L:J17' / 'R:G59' / 'L:r1:5'
   return { bb: m[1], row: m[2], col: +m[3] };
 }
 
+const NOBOARD = { name: '（還沒選開發板）', short: '', top: [], bottom: [], none: true, sources: '', pinNotes: {} };
 // ---------- 專案編譯（算出每一欄接了什麼，並核對腳位） ----------
 function compile(proj) {
-  const B = WD.BOARDS[proj.board.type]; if (!B) throw new Error('沒有這塊板子：' + proj.board.type);
-  const top = parseHole(proj.board.top), bot = parseHole(proj.board.bottom);
+  const noBoard = !proj.board || !proj.board.type;
+  const B = noBoard ? NOBOARD : WD.BOARDS[proj.board.type]; if (!B) throw new Error('沒有這塊板子：' + proj.board.type);
+  const top = parseHole(noBoard ? 'L:J2' : proj.board.top), bot = parseHole(noBoard ? 'R:C2' : proj.board.bottom);
   const strips = {};                // key → [{kind,label,...}]
   const add = (h, item) => { const k = stripKey(h); (strips[k] = strips[k] || []).push(item); };
   const pins = [];
@@ -236,12 +238,12 @@ function buildBoard() {
     const mx1 = x1 - 0.05, mx0 = mx1 - 2.55;
     const base = box(mx1 - mx0, 0.08, mw, std('#20262e')); base.position.set((mx0 + mx1) / 2, Y + T + 0.04, zc); g.add(base);
     const shield = box(ml, 0.3, mw - 0.12, std('#c9ccd1', { metalness: 0.85, roughness: 0.32 })); shield.position.set(mx0 + 0.06 + ml / 2, Y + T + 0.23, zc); g.add(shield);
-    const stex = canvasTex(256, 256, (c, w, h) => { c.fillStyle = '#c9ccd1'; c.fillRect(0, 0, w, h); c.fillStyle = '#5b6068'; c.font = `bold 34px ${FONT}`; c.textAlign = 'center'; c.save(); c.translate(w / 2, h / 2); c.rotate(-Math.PI / 2); c.fillText('ESP32-S3', 0, -10); c.font = `24px ${FONT}`; c.fillText('N16R8', 0, 26); c.restore(); });
+    const stex = canvasTex(256, 256, (c, w, h) => { c.fillStyle = '#c9ccd1'; c.fillRect(0, 0, w, h); c.fillStyle = '#5b6068'; c.font = `bold 34px ${FONT}`; c.textAlign = 'center'; c.save(); c.translate(w / 2, h / 2); c.rotate(-Math.PI / 2); c.fillText((B.chip || ['ESP32-S3'])[0], 0, -10); c.font = `24px ${FONT}`; c.fillText((B.chip || ['', 'N16R8'])[1], 0, 26); c.restore(); });
     const lid = new THREE.Mesh(new THREE.PlaneGeometry(ml, mw - 0.12), new THREE.MeshStandardMaterial({ map: stex, metalness: 0.6, roughness: 0.35 }));
     lid.rotation.x = -Math.PI / 2; lid.position.set(shield.position.x, Y + T + 0.385, zc); g.add(lid);
     const ant = new THREE.Mesh(new THREE.PlaneGeometry(0.62, mw - 0.1), new THREE.MeshStandardMaterial({ map: canvasTex(64, 160, (c, w, h) => { c.fillStyle = '#20262e'; c.fillRect(0, 0, w, h); c.strokeStyle = '#c8a048'; c.lineWidth = 5; c.beginPath(); let x = 10; c.moveTo(x, 150); for (let y = 140; y > 20; y -= 18) { c.lineTo(x, y); x = x === 10 ? 54 : 10; c.lineTo(x, y); } c.stroke(); }) }));
     ant.rotation.x = -Math.PI / 2; ant.position.set(mx1 - 0.36, Y + T + 0.085, zc); g.add(ant);
-    [shield, lid].forEach(m => { m.userData = { tip: () => ({ t: 'ESP32-S3 模組', l: ['雙核 240 MHz、Wi‑Fi＋藍牙', '16 MB Flash＋8 MB PSRAM（N16R8）'] }) }; hoverables.push(m); });
+    [shield, lid].forEach(m => { m.userData = { tip: () => ({ t: B.moduleTitle || 'ESP32-S3 模組', l: B.moduleLines || ['雙核 240 MHz、Wi‑Fi＋藍牙', '16 MB Flash＋8 MB PSRAM（N16R8）'] }) }; hoverables.push(m); });
     ant.userData = { tip: () => ({ t: '天線', l: ['PCB 天線，收發 2.4 GHz Wi‑Fi／藍牙', '上面不要壓金屬或線，訊號會變差'] }) }; hoverables.push(ant);
     objs.anchors.module = V(shield.position.x, Y + T + 0.4, zc);
     objs.anchors.antenna = V(ant.position.x, Y + T + 0.1, zc);
@@ -365,8 +367,20 @@ function moduleGroup(m) {
     [pcb, bead].forEach(o => { o.userData = { tip: () => modTip(m) }; hoverables.push(o); });
   } else {
     const W = Math.max(span + 0.6, 1.2), H = m.height || 1.2;
-    const pcb = box(W, H, 0.14, mk(m.pcbColor || '#2d6a4f')); pcb.position.y = H / 2; tilt.add(pcb);
-    tilt.add(silkStrip(W - 0.1, 0.26, m.pcbColor || '#2d6a4f', 0.2));
+    const pc = m.pcbColor || '#2d6a4f';
+    const pcb = box(W, H, 0.14, mk(pc)); pcb.position.y = H / 2; tilt.add(pcb);
+    tilt.add(silkStrip(W - 0.1, 0.26, pc, 0.2));
+    if (m.label) {
+      const lw = W - 0.12, lh = Math.max(0.3, H - 0.5);
+      const lt = canvasTex(Math.round(lw * 120), Math.round(lh * 120), (c, cw, ch) => { c.fillStyle = pc; c.fillRect(0, 0, cw, ch); c.fillStyle = m.labelColor || '#fff'; c.textAlign = 'center'; c.textBaseline = 'middle'; let fs = Math.min(ch * 0.42, 40); c.font = `bold ${fs}px ${FONT}`; while (fs > 10 && c.measureText(m.label).width > cw * 0.92) { fs -= 2; c.font = `bold ${fs}px ${FONT}`; } c.fillText(m.label, cw / 2, ch / 2); });
+      const lp = new THREE.Mesh(new THREE.PlaneGeometry(lw, lh), mk('#fff', { map: lt })); lp.position.set(0, 0.36 + lh / 2, 0.075); tilt.add(lp); lp.userData = { tip: () => modTip(m) }; hoverables.push(lp);
+    }
+    if (m.knob) { const k = cyl(0.3, 0.35, mk('#cfd8dc', { metalness: 0.5 })); k.rotation.x = Math.PI / 2; k.position.set(0, H * 0.6, 0.25); tilt.add(k); }
+    if (m.ledColor) {
+      const ledMat = new THREE.MeshStandardMaterial({ color: '#ffffff', emissive: new THREE.Color(m.ledColor), emissiveIntensity: 0.9, transparent: true, opacity: 0.88, roughness: 0.2 });
+      const dome = new THREE.Mesh(new THREE.SphereGeometry(0.22, 20, 14), ledMat); dome.position.set(0, H + 0.1, 0); tilt.add(dome);
+      const pl = new THREE.PointLight(m.ledColor, 0.5, 3); pl.position.set(0, H + 0.2, 0.4); tilt.add(pl); objs.leds[m.id] = { mat: ledMat, light: pl };
+    }
     top = H + 0.2; pcb.userData = { tip: () => modTip(m) }; hoverables.push(pcb);
   }
   if (planned) {
@@ -471,19 +485,21 @@ function wireTip(w) {
 function loadProject(id) {
   stopSim();
   const p = WD.projects.find(x => x.id === id) || WD.projects[0];
+  const keepCam = C && C.proj === p && p.keepCamera;
   C = compile(p);
   if (root) scene.remove(root);
   hoverables.length = 0;
   root = new THREE.Group(); scene.add(root);
   objs = { anchors: {}, tall: {}, screens: {}, screenTex: {}, leds: {}, wires: {}, pinMesh: {} };
   root.add(buildBreadboard('L'), buildBreadboard('R'));
-  root.add(buildBoard());
+  objs.boardBox = { x0: 0, x1: 0, z0: 0, z1: 0, top: 0 };
+  if (!C.B.none) root.add(buildBoard());
   C.mods.forEach(m => root.add(moduleGroup(m)));
   C.wires.forEach(w => { const o = buildWire(w); o.w = w; objs.wires[w.id] = o; root.add(o.group); });
   state.step = -1; state.all = true;
   document.title = `${p.title} · 接線實驗室`;
   renderUI();
-  fitAll(true);
+  if (!keepCam) fitAll(true);
   applyStep();
   if (location.hash.slice(1).split('/')[0] !== p.id) history.replaceState(null, '', '#' + p.id);
 }
@@ -541,7 +557,7 @@ function applyStep() {
   renderStepUI();
   updateHash();
 }
-function go(i) { state.all = false; state.step = Math.max(0, Math.min(C.steps.length - 1, i)); applyStep(); }
+function go(i) { if (!C.steps.length) return; state.all = false; state.step = Math.max(0, Math.min(C.steps.length - 1, i)); applyStep(); }
 function showAll() { state.all = true; applyStep(); }
 function updateHash() { const h = '#' + C.proj.id + (state.all ? '' : '/' + (state.step + 1)); if (location.hash !== h) history.replaceState(null, '', h); }
 
@@ -648,11 +664,20 @@ function renderUI() {
   $('#boardname').textContent = C.B.name;
   // 專案列
   const strip = $('#projects'); strip.innerHTML = '';
-  WD.projects.forEach((q, i) => {
-    const b = el('button', 'pj' + (q.id === p.id ? ' on' : ''), `<span class="n">${i + 1}</span><span><b>${esc(q.short || q.title)}</b><small>${esc(WD.BOARDS[q.board.type].short)}${q.status === 'planned' ? ' · 預定' : ''}</small></span>`);
-    b.onclick = () => { location.hash = q.id; };
+  let ex = 0;
+  WD.projects.forEach((q) => {
+    const isB = !!q.builder;
+    if (!isB && ex === 0) strip.appendChild(el('span', 'pjsep', '範例'));
+    const n = isB ? '＋' : String(++ex);
+    const bt = q.board && q.board.type && WD.BOARDS[q.board.type];
+    const sub = isB ? (q.subtitleShort || '空白麵包板，自己加板子和模組') : `${bt ? bt.short : ''}${q.status === 'planned' ? ' · 預定' : ''}`;
+    const b = el('button', 'pj' + (isB ? ' bld' : '') + (q.id === p.id ? ' on' : ''), `<span class="n">${n}</span><span><b>${esc(q.short || q.title)}</b><small>${esc(sub)}</small></span>`);
+    b.onclick = () => { if (location.hash.slice(1).split('/')[0] === q.id) loadProject(q.id); else location.hash = q.id; };
     strip.appendChild(b);
   });
+  // 自己組：「組裝」分頁只在自己組模式出現
+  const bTab = document.querySelector('.tabs button[data-t=build]');
+  if (bTab) { bTab.style.display = p.builder ? '' : 'none'; if (!p.builder && bTab.classList.contains('on')) document.querySelector('.tabs button[data-t=steps]').click(); }
   // 接線表
   const rows = C.wires.map(w => {
     const bp = w.boardPin; const bpTxt = bp ? `${bp.row === 'top' ? '上' : '下'}${bp.idx + 1}（${holeName(w.from)}）` : holeName(w.from);
@@ -661,7 +686,7 @@ function renderUI() {
     const bad = (w.pinOk === false || w.modOk === false) ? ' <em class="bd bad">腳位不符</em>' : '';
     return `<tr data-w="${w.id}"><td>${chip(w)}${w.kind === 'resistor' ? '電阻' : esc(FUNC[w.func].name)}</td><td>${bpTxt}</td><td><b>${esc(gp)}</b></td><td>${mp}</td><td>${esc(w.label)}${w.note ? `<small>${esc(w.note)}</small>` : ''}${statusBadge(w.status)}${w.status === 'tbd' && w.tbd ? `<small>待確認：${esc(w.tbd)}</small>` : ''}${bad}</td></tr>`;
   }).join('');
-  $('#tab-table').innerHTML = `<p class="hint">點一列就會在 3D 裡標出那條線。線色依功能（紅＝電源、黑＝GND、其他＝訊號），不一定是你手上跳線的顏色。孔名「左I17」＝左麵包板 I 排第 17 欄。</p><div class="tw"><table><thead><tr><th>線色</th><th>板子腳位</th><th>GPIO</th><th>模組腳位</th><th>說明</th></tr></thead><tbody>${rows}</tbody></table></div>`;
+  if (p.tableHTML) $('#tab-table').innerHTML = p.tableHTML(C); else $('#tab-table').innerHTML = `<p class="hint">點一列就會在 3D 裡標出那條線。線色依功能（紅＝電源、黑＝GND、其他＝訊號），不一定是你手上跳線的顏色。孔名「左I17」＝左麵包板 I 排第 17 欄。</p><div class="tw"><table><thead><tr><th>線色</th><th>板子腳位</th><th>GPIO</th><th>模組腳位</th><th>說明</th></tr></thead><tbody>${rows}</tbody></table></div>`;
   $('#tab-table').querySelectorAll('tr[data-w]').forEach(tr => tr.onclick = () => { const si = C.steps.findIndex(s => (s.wires || []).includes(tr.dataset.w)); if (si >= 0) { go(si); if (isNarrow()) $('#stage').scrollIntoView({ behavior: 'smooth' }); } });
   // 注意事項＋待確認
   const warn = C.warn.length ? `<div class="box bad"><b>⚠ 設定檔腳位核對不符</b><ul>${C.warn.map(s => `<li>${esc(s)}</li>`).join('')}</ul></div>` : `<div class="box ok"><b>✓ 腳位自動核對通過</b><div>每條線的孔位都依板子實際腳序算過，和設定寫的 GPIO 一致。</div></div>`;
@@ -679,6 +704,7 @@ function renderUI() {
     <div class="pinrow"><small>上排</small>${C.pins.filter(x => x.row === 'top').map(pinChip).join('')}</div>
     <div class="pinrow"><small>下排</small>${C.pins.filter(x => x.row === 'bottom').map(pinChip).join('')}</div>
     <p class="hint">${esc(C.B.sources)}</p>`;
+  if (C.B.none) $('#tab-pins').innerHTML = '<p class="hint">還沒選開發板。到「組裝」分頁先選一塊板子。</p>';
   // 程式
   $('#codepre').innerHTML = hl(p.code || '// 這個專案還沒有程式');
   $('#simbtn').style.display = p.sim ? '' : 'none';
@@ -693,6 +719,8 @@ function renderUI() {
   });
   // 圖例
   const used = new Set(C.wires.map(w => w.func));
+  if (p.onRender) p.onRender(C);
+  $('#legend').style.display = C.wires.length ? '' : 'none';
   $('#legend').innerHTML = Object.keys(FUNC).filter(k => used.has(k)).map(k => `<span><i style="background:${FUNC[k].color}"></i>${FUNC[k].name}</span>`).join('') + (C.wires.some(w => w.status === 'planned') ? `<span><i style="background:repeating-linear-gradient(90deg,#888 0 5px,#fff 5px 8px)"></i>未接／預定</span>` : '');
 }
 function renderStepUI() {
@@ -701,10 +729,13 @@ function renderStepUI() {
   $('#mcount').textContent = all ? `全部 ${n} 步` : `${state.step + 1}/${n}`;
   $('#progress i').style.width = all ? '100%' : ((state.step + 1) / n * 100) + '%';
   ['#prev', '#mprev'].forEach(s => $(s).disabled = !all && state.step <= 0);
-  ['#next', '#mnext'].forEach(s => $(s).disabled = !all && state.step >= n - 1);
+  ['#next', '#mnext'].forEach(s => $(s).disabled = n === 0 || (!all && state.step >= n - 1));
+  ['#prev', '#mprev'].forEach(s => { if (n === 0) $(s).disabled = true; });
   $('#allbtn').classList.toggle('on', all);
   const card = $('#stepcard');
-  if (all) {
+  if (all && C.proj.introHTML) {
+    card.innerHTML = C.proj.introHTML(C);
+  } else if (all) {
     card.innerHTML = `<div class="sh"><span class="big">${n}</span><div><b>${esc(C.proj.title)}</b><small>按「下一步」從第 1 步開始，一次只亮一條線</small></div></div><p>${esc(C.proj.intro || '')}</p>`;
   } else {
     const s = C.steps[state.step], ws = stepWires(state.step);
@@ -802,6 +833,7 @@ function zoom(f) { const d = camera.position.clone().sub(controls.target).multip
 function orbit(a) { const d = camera.position.clone().sub(controls.target); d.applyAxisAngle(V(0, 1, 0), a); Object.assign(camAnim, { t: 0, from: camera.position.clone(), to: controls.target.clone().add(d), tf: controls.target.clone(), tt: controls.target.clone() }); }
 function flash(sel, txt) { const b = $(sel), o = b.textContent; b.textContent = txt; setTimeout(() => b.textContent = o, 1200); }
 WD.debug = () => ({ C, objs, camera, holePos });
+WD.reload = () => { if (C) loadProject(C.proj.id); };
 WD.go = i => go(i); WD.showAll = showAll; WD.load = id => loadProject(id); WD.state = state; WD.startSim = startSim;
 window.addEventListener('DOMContentLoaded', boot);
 })();

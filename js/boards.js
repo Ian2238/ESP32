@@ -67,5 +67,34 @@ WD.BOARDS = {
       'RX': 'UART0 RX（GPIO44）。',
       'TX': 'UART0 TX（GPIO43）。'
     }
+  },
+  // ESP32 DevKitC V4（38 腳，經典 ESP32-WROOM-32）：不是 Ian 手上的板子，給「自己組」參考用。
+  // 腳序依 Espressif ESP32-DevKitC V4 腳位圖（J2／J3），轉成 USB 在左、元件朝上：上排＝J2 反向、下排＝J3 反向。
+  devkitc38: {
+    name: 'ESP32 DevKitC 38 腳（WROOM-32）',
+    short: 'ESP32 DevKitC',
+    color: '#1b2a3a',
+    top:    ['5V','CMD','D3','D2','13','GND','12','14','27','26','25','33','32','35','34','VN','VP','EN','3V3'],
+    bottom: ['CLK','D0','D1','15','2','0','4','16','17','5','18','19','GND','21','RX','TX','22','23','GND'],
+    pcb: { before: 1.6, after: 2.6, margin: 0.55 },
+    features: ['module', 'usb1', 'buttons'],
+    chip: ['ESP32', 'WROOM-32'],
+    moduleTitle: 'ESP32-WROOM-32 模組',
+    moduleLines: ['雙核 240 MHz、Wi‑Fi＋藍牙', '4 MB Flash，沒有 PSRAM'],
+    usbNote: 'Micro-USB／USB-C（看版本），USB 轉序列晶片 CP2102 或 CH340。',
+    sources: '腳序：Espressif ESP32-DevKitC V4 使用指南的 J2／J3 腳位圖（轉成 USB 在左）。不是 Ian 手上的板子，實際以絲印為準。',
+    gpioOf: { VP: '36', VN: '39' },
+    pinNotes: {
+      '5V': '5V 電源腳（USB 的 5V）。3.3V 模組不要接這裡！',
+      '3V3': '3.3V 輸出。', 'GND': '接地。', 'EN': '重置腳，一般不要接。',
+      'CMD': '接內部 Flash（GPIO11），不能用。', 'CLK': '接內部 Flash（GPIO6），不能用。',
+      'D0': '接內部 Flash（GPIO7），不能用。', 'D1': '接內部 Flash（GPIO8），不能用。',
+      'D2': '接內部 Flash（GPIO9），不能用。', 'D3': '接內部 Flash（GPIO10），不能用。',
+      '0': 'Strap 腳（BOOT 鍵），不要接。', '2': 'Strap 腳，盡量不用。', '5': 'Strap 腳，盡量不用。',
+      '12': 'Strap 腳（Flash 電壓），開機時被拉高會開不了機，不要接。', '15': 'Strap 腳，盡量不用。',
+      '34': '只能輸入（沒有內部上拉），ADC1。', '35': '只能輸入（沒有內部上拉），ADC1。',
+      'VP': 'GPIO36，只能輸入，ADC1。', 'VN': 'GPIO39，只能輸入，ADC1。',
+      'RX': 'UART0 RX（GPIO3），序列 log 用。', 'TX': 'UART0 TX（GPIO1），序列 log 用。'
+    }
   }
 };
