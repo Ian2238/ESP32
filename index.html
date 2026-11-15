@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="zh-Hant-TW">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#f6efe3">
+<title>接線實驗室</title>
+<link rel="stylesheet" href="css/app.css">
+</head>
+<body>
+<header class="top">
+  <div class="logo"><svg viewBox="0 0 40 40" aria-hidden="true"><rect x="7" y="9" width="26" height="22" rx="3" fill="none" stroke="#ff6a1a" stroke-width="3"/><g stroke="#ff6a1a" stroke-width="2.6" stroke-linecap="round"><path d="M12 9V4M20 9V4M28 9V4M12 31v5M20 31v5M28 31v5"/></g><circle cx="20" cy="20" r="4" fill="#ff6a1a"/></svg>
+    <div><h1>接線<span>實驗室</span></h1><small>看・接・對・測</small></div></div>
+  <div class="ptitle"><b id="ptitle"></b><small id="psub"></small></div>
+  <div class="prog"><div><small>接線進度</small><b id="count"></b></div><div id="progress"><i></i></div><small id="clock"></small></div>
+</header>
+<main class="layout">
+  <section id="stage">
+    <div id="view"></div>
+    <svg id="leaders"></svg>
+    <div id="callouts"></div>
+    <div id="tip"></div>
+    <div id="err"></div>
+    <div class="boardtag"><small>板子</small><b id="boardname"></b></div>
+    <div id="legend"></div>
+    <div class="vctl">
+      <button id="v-l" title="向左轉">⟲</button><button id="v-r" title="向右轉">⟳</button><i></i>
+      <button id="v-out" title="縮小">－</button><button id="v-in" title="放大">＋</button><i></i>
+      <button id="v-reset" title="重設視角">⌂</button><button id="v-lab" class="on" title="顯示／隱藏標籤">標</button>
+    </div>
+    <div class="hint3d">拖曳旋轉・雙指縮放・點線或腳位看說明</div>
+  </section>
+  <aside class="panel">
+    <div class="stepbox">
+      <div id="stepcard"></div>
+      <div class="stepnav">
+        <button id="prev">‹ 上一步</button>
+        <button id="allbtn" class="ghost">全部顯示</button>
+        <button id="next" class="pri">下一步 ›</button>
+      </div>
+    </div>
+    <nav class="tabs">
+      <button data-t="steps" class="on">步驟</button><button data-t="table">接線表</button><button data-t="code">程式</button><button data-t="safety">注意</button><button data-t="pins">腳位圖</button>
+    </nav>
+    <div class="tab on" id="tab-steps"><ol id="steplist"></ol></div>
+    <div class="tab" id="tab-table"></div>
+    <div class="tab" id="tab-code">
+      <div class="codebar"><b>程式片段</b><span><button id="copybtn">複製</button><button id="simbtn" class="pri">▶ 模擬</button></span></div>
+      <pre id="codepre"></pre>
+      <div class="codebar"><b>序列埠（模擬）</b><small id="simname"></small></div>
+      <pre id="serial"></pre>
+    </div>
+    <div class="tab" id="tab-safety"></div>
+    <div class="tab" id="tab-pins"></div>
+  </aside>
+</main>
+<footer class="pjbar"><small>專案</small><div id="projects"></div></footer>
+<div class="mnav"><button id="mprev">‹</button><button id="mall" class="ghost">全部</button><b id="mcount"></b><button id="mnext" class="pri">下一步 ›</button></div>
+
+<script src="js/lib/three.min.js"></script>
+<script src="js/lib/OrbitControls.js"></script>
+<script src="js/boards.js"></script>
+<script src="assets/images.js"></script>
+<script src="js/app.js"></script>
+<!-- 專案設定：新增專案就在下面多加一行 -->
+<script src="projects/monalisa.js"></script>
+<script src="projects/cam-oled.js"></script>
+<script src="projects/s3-climate.js"></script>
+</body>
+</html>
