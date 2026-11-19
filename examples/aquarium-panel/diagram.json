@@ -1,0 +1,288 @@
+{
+ "version": 1,
+ "author": "Ian",
+ "editor": "wokwi",
+ "parts": [
+  {
+   "type": "wokwi-breadboard",
+   "id": "bbL",
+   "top": -4.2,
+   "left": -6.8,
+   "attrs": {}
+  },
+  {
+   "type": "wokwi-breadboard",
+   "id": "bbR",
+   "top": 220,
+   "left": -6.8,
+   "attrs": {}
+  },
+  {
+   "type": "board-esp32-s3-devkitc-1",
+   "id": "esp",
+   "top": 120,
+   "left": 60,
+   "rotate": 90,
+   "attrs": {
+    "flashSize": "16",
+    "psramSize": "8"
+   }
+  },
+  {
+   "type": "wokwi-logic-analyzer",
+   "id": "laData",
+   "top": 430,
+   "left": 300,
+   "attrs": {
+    "bufferSize": "2000"
+   }
+  },
+  {
+   "type": "wokwi-logic-analyzer",
+   "id": "laCtl",
+   "top": 430,
+   "left": 560,
+   "attrs": {
+    "bufferSize": "2000"
+   }
+  },
+  {
+   "type": "wokwi-text",
+   "id": "note",
+   "top": 520,
+   "left": 160,
+   "attrs": {
+    "text": "魚缸控制盤 v0.1。Wokwi 沒有 8 位元並列 TFT／UNO 擴充板：用兩個邏輯分析儀代替擴充板腳位（laData=D0..D7、laCtl=RS,CS,WR,RD,RST）。\n浮球開關用 wokwi-pushbutton 代替（按下＝接點閉合＝GPIO18 為 LOW）：線A→左I13(GPIO18)、線B→右D3(GND)。\n實物的觸控共用 RS/CS/D0/D1，Wokwi 不能模擬。水泵／燈等用 Wi-Fi 智慧插座，不在此圖。孔位以 wiring-aquarium-panel.png 為準。"
+   }
+  },
+  {
+   "type": "wokwi-pushbutton",
+   "id": "floatsw",
+   "top": 330,
+   "left": 560,
+   "attrs": {
+    "color": "yellow",
+    "label": "float"
+   }
+  }
+ ],
+ "connections": [
+  [
+   "esp:TX",
+   "$serialMonitor:RX",
+   "",
+   []
+  ],
+  [
+   "esp:RX",
+   "$serialMonitor:TX",
+   "",
+   []
+  ],
+  [
+   "esp:GND.1",
+   "bbL:2b.j",
+   "black",
+   []
+  ],
+  [
+   "bbL:2b.i",
+   "laData:GND",
+   "black",
+   []
+  ],
+  [
+   "bbL:2b.h",
+   "laCtl:GND",
+   "black",
+   []
+  ],
+  [
+   "esp:5V",
+   "bbL:3b.j",
+   "#c0392b",
+   []
+  ],
+  [
+   "esp:13",
+   "bbL:5b.j",
+   "#2c6fd6",
+   []
+  ],
+  [
+   "bbL:5b.i",
+   "laData:D5",
+   "#2c6fd6",
+   []
+  ],
+  [
+   "esp:12",
+   "bbL:6b.j",
+   "#2e9b3e",
+   []
+  ],
+  [
+   "bbL:6b.i",
+   "laData:D4",
+   "#2e9b3e",
+   []
+  ],
+  [
+   "esp:11",
+   "bbL:7b.j",
+   "#e6c200",
+   []
+  ],
+  [
+   "bbL:7b.i",
+   "laData:D3",
+   "#e6c200",
+   []
+  ],
+  [
+   "esp:10",
+   "bbL:8b.j",
+   "#f08a00",
+   []
+  ],
+  [
+   "bbL:8b.i",
+   "laData:D2",
+   "#f08a00",
+   []
+  ],
+  [
+   "esp:9",
+   "bbL:9b.j",
+   "#e02020",
+   []
+  ],
+  [
+   "bbL:9b.i",
+   "laData:D1",
+   "#e02020",
+   []
+  ],
+  [
+   "esp:8",
+   "bbL:12b.j",
+   "#8b5a2b",
+   []
+  ],
+  [
+   "bbL:12b.i",
+   "laData:D0",
+   "#8b5a2b",
+   []
+  ],
+  [
+   "esp:17",
+   "bbL:14b.j",
+   "#808080",
+   []
+  ],
+  [
+   "bbL:14b.i",
+   "laData:D7",
+   "#808080",
+   []
+  ],
+  [
+   "esp:16",
+   "bbL:15b.j",
+   "#8e44ad",
+   []
+  ],
+  [
+   "bbL:15b.i",
+   "laData:D6",
+   "#8e44ad",
+   []
+  ],
+  [
+   "esp:15",
+   "bbL:16b.j",
+   "#b8860b",
+   []
+  ],
+  [
+   "bbL:16b.i",
+   "laCtl:D4",
+   "#b8860b",
+   []
+  ],
+  [
+   "esp:7",
+   "bbL:17b.j",
+   "#a0a0a0",
+   []
+  ],
+  [
+   "bbL:17b.i",
+   "laCtl:D3",
+   "#a0a0a0",
+   []
+  ],
+  [
+   "esp:6",
+   "bbL:18b.j",
+   "#5b3fa0",
+   []
+  ],
+  [
+   "bbL:18b.i",
+   "laCtl:D2",
+   "#5b3fa0",
+   []
+  ],
+  [
+   "esp:5",
+   "bbL:19b.j",
+   "#d81b8c",
+   []
+  ],
+  [
+   "bbL:19b.i",
+   "laCtl:D1",
+   "#d81b8c",
+   []
+  ],
+  [
+   "esp:4",
+   "bbL:20b.j",
+   "#00a8a8",
+   []
+  ],
+  [
+   "bbL:20b.i",
+   "laCtl:D0",
+   "#00a8a8",
+   []
+  ],
+  [
+   "esp:18",
+   "bbL:13b.j",
+   "teal",
+   []
+  ],
+  [
+   "bbL:13b.i",
+   "floatsw:1.l",
+   "teal",
+   []
+  ],
+  [
+   "esp:GND.2",
+   "bbR:3t.c",
+   "black",
+   []
+  ],
+  [
+   "floatsw:2.l",
+   "bbR:3t.d",
+   "black",
+   []
+  ]
+ ],
+ "dependencies": {}
+}
