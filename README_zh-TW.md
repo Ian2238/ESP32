@@ -8,7 +8,7 @@
 - 加了零件就會自動擺上麵包板、分配 GPIO、拉線，接線表變成「零件｜零件腳｜接到板子腳位｜線色｜備註」，程式分頁出 `#define` 腳位和 setup 骨架；步驟一樣可以一條一條亮。
 - 自動配線規則：電源預設 3V3（只有伺服、繼電器、WS2812、超音波、PIR、雷達用 5V，走右下＋軌）；類比只接 ADC1；不用 strap（S3：0/3/45/46）、Flash／PSRAM（S3 N16R8：26–37）、USB（19/20）、UART0；S3 CAM 避開相機腳 4–13、15–18；I2C 共用 SDA／SCL，SPI 共用 SCK／MOSI、每個裝置各自 CS；LED 串 220Ω、DS18B20 上拉 4.7k、按鈕／浮球可加 10k 上拉；腳位或麵包板空間不夠會跳警告。
 - 組好的內容存在瀏覽器 localStorage。程式碼在 `js/builder.js`（零件庫 `PARTS`、各板可用腳位 `PROF`）。
-- 下方「範例」是原本的三個專案（蒙娜麗莎、CAM＋OLED、氣候站），網址 `#monalisa` 等照舊。
+- 下方「範例」是原本的三個專案（蒙娜麗莎、CAM＋OLED、氣候站）加上 `#aquarium-panel`（魚缸控制盤 v0.1：2.4吋 UNO 觸控屏＋浮球液位；2D 圖、Wokwi、腳位表、韌體在 `examples/aquarium-panel/`），網址 `#monalisa` 等照舊。
 - 測試：`node tools/validate.js`（含自己組自動配線檢查：短路、同孔、禁用腳、類比在 ADC1）、`node tools/ui-test.js`（點擊測試）、`node tools/shot.js build`（截圖）。
 
 ## 打開

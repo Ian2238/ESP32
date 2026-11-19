@@ -26,6 +26,9 @@ const shots=[
   ['desktop-s3-climate-step15',{width:1440,height:900},'#s3-climate/15'],
   ['phone-s3-climate-all',{width:390,height:844,mobile:true},'#s3-climate'],
   ['phone-s3-climate-step5',{width:390,height:844,mobile:true},'#s3-climate/5'],
+  ['desktop-aquarium-panel-all',{width:1440,height:900},'#aquarium-panel'],
+  ['desktop-aquarium-panel-step16',{width:1440,height:900},'#aquarium-panel/16'],
+  ['phone-aquarium-panel-all',{width:390,height:844,mobile:true},'#aquarium-panel'],
 ];
 const only=process.argv[2];
 (async()=>{

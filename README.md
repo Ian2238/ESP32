@@ -13,6 +13,7 @@
 - 蒙娜麗莎（TFT 播放器）
 - s3-climate（溫濕度／土壤）
 - CAM + OLED
+- 魚缸控制盤 v0.1（2.4吋 UNO 觸控屏＋浮球液位）：3D `#aquarium-panel`；2D 圖／Wokwi／腳位表／韌體在 `examples/aquarium-panel/`
 
 本機預覽：用瀏覽器打開 `index.html`，或在此目錄開一個靜態伺服器。
 
@@ -29,6 +30,7 @@ Projects included:
 - Mona Lisa (TFT player)
 - s3-climate (temperature / humidity / soil)
 - CAM + OLED
+- Aquarium control panel v0.1 (2.4" UNO touch TFT + float switch): 3D `#aquarium-panel`; 2D diagram / Wokwi / pin table / firmware in `examples/aquarium-panel/`
 
 To preview locally, open `index.html` in a browser or serve this folder with a static file server.
 
